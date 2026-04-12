@@ -16,24 +16,39 @@ namespace CaravanRoguelite.UI
         {
             _root = new GameObject("ChoicePanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             _root.SetParent(parent, false);
-            _root.anchorMin = new Vector2(0.2f, 0.2f);
-            _root.anchorMax = new Vector2(0.8f, 0.78f);
+            _root.anchorMin = new Vector2(0.19f, 0.18f);
+            _root.anchorMax = new Vector2(0.81f, 0.82f);
             _root.offsetMin = Vector2.zero;
             _root.offsetMax = Vector2.zero;
-            _root.GetComponent<Image>().color = new Color(0.08f, 0.09f, 0.12f, 0.95f);
 
-            _title = UiFactory.MakeText(_root, "", 26, TextAnchor.UpperCenter);
-            _title.rectTransform.anchorMin = new Vector2(0f, 0.83f);
-            _title.rectTransform.anchorMax = new Vector2(1f, 1f);
+            var panelImage = _root.GetComponent<Image>();
+            panelImage.sprite = ProceduralSpriteFactory.CreateRoundedRect(VisualTheme.PanelFill, VisualTheme.PanelBorder, 128, 24, 7);
+            panelImage.type = Image.Type.Sliced;
 
-            _body = UiFactory.MakeText(_root, "", 18, TextAnchor.UpperLeft);
-            _body.rectTransform.anchorMin = new Vector2(0.06f, 0.42f);
-            _body.rectTransform.anchorMax = new Vector2(0.94f, 0.8f);
+            var highlight = new GameObject("PanelHighlight", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            highlight.SetParent(_root, false);
+            highlight.anchorMin = new Vector2(-0.12f, 0.58f);
+            highlight.anchorMax = new Vector2(1.12f, 1.08f);
+            highlight.offsetMin = Vector2.zero;
+            highlight.offsetMax = Vector2.zero;
+            var highlightImage = highlight.GetComponent<Image>();
+            highlightImage.raycastTarget = false;
+            highlightImage.sprite = ProceduralSpriteFactory.CreateSoftCircle(new Color(0.35f, 0.68f, 1f, 0.16f), 160, 2.2f);
+
+            _title = UiFactory.MakeText(_root, "", 28, TextAnchor.UpperCenter);
+            _title.rectTransform.anchorMin = new Vector2(0.06f, 0.82f);
+            _title.rectTransform.anchorMax = new Vector2(0.94f, 0.98f);
+            _title.color = VisualTheme.TextPrimary;
+
+            _body = UiFactory.MakeText(_root, "", 19, TextAnchor.UpperLeft);
+            _body.rectTransform.anchorMin = new Vector2(0.07f, 0.42f);
+            _body.rectTransform.anchorMax = new Vector2(0.93f, 0.79f);
+            _body.color = VisualTheme.TextDim;
 
             _choices = new GameObject("Choices", typeof(RectTransform)).GetComponent<RectTransform>();
             _choices.SetParent(_root, false);
             _choices.anchorMin = new Vector2(0.08f, 0.08f);
-            _choices.anchorMax = new Vector2(0.92f, 0.38f);
+            _choices.anchorMax = new Vector2(0.92f, 0.35f);
             _choices.offsetMin = Vector2.zero;
             _choices.offsetMax = Vector2.zero;
 
@@ -51,16 +66,17 @@ namespace CaravanRoguelite.UI
                 UnityEngine.Object.Destroy(child.gameObject);
             }
 
+            float slot = 1f / Mathf.Max(choices.Count, 1);
             for (int i = 0; i < choices.Count; i++)
             {
                 var button = UiFactory.MakeButton(_choices, choices[i]);
                 int captured = i;
                 button.onClick.AddListener(() => onPick(captured));
                 var rect = button.GetComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0f, 1f - (i + 1) * 0.3f);
-                rect.anchorMax = new Vector2(1f, 1f - i * 0.3f);
-                rect.offsetMin = new Vector2(0, -6);
-                rect.offsetMax = new Vector2(0, -6);
+                rect.anchorMin = new Vector2(0f, 1f - (i + 1) * slot + 0.02f);
+                rect.anchorMax = new Vector2(1f, 1f - i * slot - 0.02f);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
             }
         }
 

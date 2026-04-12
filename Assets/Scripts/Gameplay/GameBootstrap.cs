@@ -14,6 +14,7 @@ namespace CaravanRoguelite.Gameplay
         {
             EnsureCamera();
             var canvas = BuildCanvas();
+            BuildBackdrop(canvas.transform);
 
             _context = new GameContext();
             _context.Hud = new GameHud(canvas.transform);
@@ -31,13 +32,14 @@ namespace CaravanRoguelite.Gameplay
         private void Update()
         {
             _context?.StateMachine.Tick();
+            _context?.MapView.Tick(Time.time);
         }
 
         private void EnsureCamera()
         {
             if (Camera.main != null)
             {
-                Camera.main.backgroundColor = new Color(0.05f, 0.06f, 0.08f);
+                Camera.main.backgroundColor = VisualTheme.BackgroundBottom;
                 return;
             }
 
@@ -45,7 +47,7 @@ namespace CaravanRoguelite.Gameplay
             cameraGo.tag = "MainCamera";
             var cam = cameraGo.GetComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.05f, 0.06f, 0.08f);
+            cam.backgroundColor = VisualTheme.BackgroundBottom;
             cam.orthographic = true;
         }
 
@@ -60,6 +62,31 @@ namespace CaravanRoguelite.Gameplay
             scaler.referenceResolution = new Vector2(1280, 720);
 
             return canvas;
+        }
+
+        private void BuildBackdrop(Transform parent)
+        {
+            var bg = new GameObject("Backdrop", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            bg.SetParent(parent, false);
+            bg.anchorMin = Vector2.zero;
+            bg.anchorMax = Vector2.one;
+            bg.offsetMin = Vector2.zero;
+            bg.offsetMax = Vector2.zero;
+            bg.SetAsFirstSibling();
+
+            var image = bg.GetComponent<Image>();
+            image.sprite = ProceduralSpriteFactory.CreateProceduralBackdrop(VisualTheme.BackgroundTop, VisualTheme.BackgroundBottom, VisualTheme.Accent, 768, 512, Random.Range(0, 99999));
+            image.type = Image.Type.Simple;
+
+            var haze = new GameObject("BackdropHaze", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            haze.SetParent(bg, false);
+            haze.anchorMin = new Vector2(-0.1f, -0.05f);
+            haze.anchorMax = new Vector2(1.1f, 1.05f);
+            haze.offsetMin = Vector2.zero;
+            haze.offsetMax = Vector2.zero;
+            var hazeImage = haze.GetComponent<Image>();
+            hazeImage.sprite = ProceduralSpriteFactory.CreateSoftCircle(new Color(0.2f, 0.4f, 0.7f, 0.18f), 512, 2.3f);
+            hazeImage.raycastTarget = false;
         }
     }
 }
