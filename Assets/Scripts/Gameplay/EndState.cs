@@ -26,6 +26,14 @@ namespace CaravanRoguelite.Gameplay
                 UnityEngine.SceneManagement.SceneManager.LoadScene(0);
             });
             _context.Hud.Log(_win ? "Кампания завершена успешно." : "Экспедиция потеряна.");
+            if (_win)
+            {
+                _context.Sounds.PlayWin();
+            }
+            else
+            {
+                _context.Sounds.PlayLose();
+            }
         }
 
         public void Tick() { }

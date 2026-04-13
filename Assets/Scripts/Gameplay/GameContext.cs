@@ -20,6 +20,7 @@ namespace CaravanRoguelite.Gameplay
         public MapView MapView;
         public GameHud Hud;
         public ChoicePanel Panel;
+        public UiSoundPlayer Sounds;
 
         public int Day = 1;
         public int CurrentNodeId;

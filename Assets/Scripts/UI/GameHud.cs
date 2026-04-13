@@ -14,7 +14,7 @@ namespace CaravanRoguelite.UI
         {
             var topPanel = new GameObject("TopPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             topPanel.SetParent(parent, false);
-            topPanel.anchorMin = new Vector2(0f, 0.905f);
+            topPanel.anchorMin = new Vector2(0f, 0.915f);
             topPanel.anchorMax = new Vector2(1f, 0.995f);
             topPanel.offsetMin = new Vector2(16, 0);
             topPanel.offsetMax = new Vector2(-16, 0);
@@ -23,13 +23,23 @@ namespace CaravanRoguelite.UI
             topImage.type = Image.Type.Sliced;
 
             _top = UiFactory.MakeText(topPanel, "", 22, TextAnchor.MiddleLeft);
-            _top.rectTransform.anchorMin = new Vector2(0.02f, 0.42f);
-            _top.rectTransform.anchorMax = new Vector2(0.98f, 0.98f);
+            _top.rectTransform.anchorMin = new Vector2(0.02f, 0.08f);
+            _top.rectTransform.anchorMax = new Vector2(0.98f, 0.92f);
             _top.color = VisualTheme.TextPrimary;
 
-            _stats = UiFactory.MakeText(topPanel, "", 16, TextAnchor.LowerLeft);
-            _stats.rectTransform.anchorMin = new Vector2(0.02f, 0.03f);
-            _stats.rectTransform.anchorMax = new Vector2(0.98f, 0.42f);
+            var statsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            statsPanel.SetParent(parent, false);
+            statsPanel.anchorMin = new Vector2(0.02f, 0.18f);
+            statsPanel.anchorMax = new Vector2(0.26f, 0.9f);
+            statsPanel.offsetMin = Vector2.zero;
+            statsPanel.offsetMax = Vector2.zero;
+            var statsImage = statsPanel.GetComponent<Image>();
+            statsImage.sprite = ProceduralSpriteFactory.CreateRoundedRect(new Color(0.06f, 0.09f, 0.13f, 0.9f), new Color(0.25f, 0.4f, 0.58f, 0.98f), 128, 18, 6);
+            statsImage.type = Image.Type.Sliced;
+
+            _stats = UiFactory.MakeText(statsPanel, "", 17, TextAnchor.UpperLeft);
+            _stats.rectTransform.anchorMin = new Vector2(0.08f, 0.05f);
+            _stats.rectTransform.anchorMax = new Vector2(0.92f, 0.95f);
             _stats.color = VisualTheme.TextDim;
 
             var logPanel = new GameObject("LogPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
@@ -51,7 +61,14 @@ namespace CaravanRoguelite.UI
         public void Refresh(CaravanStats stats, int day)
         {
             _top.text = $"Караван в пути — День {day}";
-            _stats.text = $"HP {stats.Health}/{stats.MaxHealth}   Еда {stats.Food}   Золото {stats.Gold}   Мораль {stats.Morale}   Атака {stats.Attack}";
+            _stats.text =
+                $"┌ Статы каравана\n" +
+                $"│ HP: {stats.Health}/{stats.MaxHealth}\n" +
+                $"│ Еда: {stats.Food}\n" +
+                $"│ Золото: {stats.Gold}\n" +
+                $"│ Мораль: {stats.Morale}\n" +
+                $"│ Атака: {stats.Attack}\n" +
+                "└────────────";
         }
 
         public void Log(string message)

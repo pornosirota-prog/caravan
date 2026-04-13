@@ -46,16 +46,19 @@ namespace CaravanRoguelite.Gameplay
             {
                 _enemyHealth -= _context.Stats.Attack;
                 _context.Hud.Log($"Вы нанесли {_context.Stats.Attack} урона.");
+                _context.Sounds.PlayHit();
             }
             else if (index == 1)
             {
                 _guarding = true;
                 _context.Hud.Log("Караван готовится к удару.");
+                _context.Sounds.PlayClick();
             }
             else
             {
                 _context.Stats.Morale -= 2;
                 _context.Hud.Log("Отступление удалось, но дух каравана упал.");
+                _context.Sounds.PlayWarn();
                 ResolveEnd(false);
                 return;
             }
@@ -64,6 +67,7 @@ namespace CaravanRoguelite.Gameplay
             {
                 _context.Stats.Gold += _enemy.RewardGold;
                 _context.Hud.Log($"Победа! Добыто {_enemy.RewardGold} золота.");
+                _context.Sounds.PlayWin();
                 if (_isBoss)
                 {
                     _context.Victory?.Invoke();
@@ -78,6 +82,7 @@ namespace CaravanRoguelite.Gameplay
             _guarding = false;
             _context.Stats.Health -= income;
             _context.Hud.Log($"{_enemy.Name} наносит {income} урона.");
+            _context.Sounds.PlayHit();
             ResolveEnd(true);
         }
 
