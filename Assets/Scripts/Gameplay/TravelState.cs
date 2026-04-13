@@ -15,7 +15,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
-            _context.Hud.Log("Ваш узел помечен \"ВЫ ЗДЕСЬ\". Нажимайте только на узлы со стрелкой ▲ ЖМИ.");
+            _context.Hud.Log("Ваш караван отмечен над текущим узлом. Кликните доступный узел, чтобы увидеть прогноз перед переходом.");
             _context.MapView.Render(_context.Graph, _context.CurrentNodeId, OnNodeClicked);
             _context.MapView.SetInteractable(GetAvailable());
             _context.Hud.Refresh(_context.Stats, _context.Day);
@@ -37,9 +37,31 @@ namespace CaravanRoguelite.Gameplay
             var available = GetAvailable();
             if (!available.Contains(id))
             {
+                _context.Hud.Log("Этот узел пока недоступен. Выберите узел со стрелкой ▲.");
                 return;
             }
 
+            var node = _context.Graph.Get(id);
+            _context.Panel.Show(
+                $"Переход: {NodeName(node.Type)}",
+                BuildTravelForecast(node),
+                new List<string> { "Поехать", "Отмена" },
+                choice =>
+                {
+                    _context.Panel.Hide();
+                    if (choice == 0)
+                    {
+                        ConfirmTravel(id);
+                    }
+                    else
+                    {
+                        _context.Hud.Log("Переход отменён. Выберите другой маршрут.");
+                    }
+                });
+        }
+
+        private void ConfirmTravel(int id)
+        {
             _context.CurrentNodeId = id;
             _context.Day++;
             _context.Stats.Food--;
@@ -71,6 +93,32 @@ namespace CaravanRoguelite.Gameplay
             }
 
             _context.StateMachine.ChangeState(new EventState(_context));
+        }
+
+        private string BuildTravelForecast(MapNode node)
+        {
+            string result = node.Type switch
+            {
+                NodeType.Combat => "Ожидается бой. Можно получить золото, но есть риск потери HP и морали.",
+                NodeType.City => "Город: можно восстановиться и подготовиться к следующим дням.",
+                NodeType.Boss => "Опаснейшая битва с боссом. Подготовьтесь по еде, HP и атаке.",
+                NodeType.Event => "Случайное событие: выбор с наградой или риском.",
+                _ => "Дорога без гарантии, но с шансом на полезную находку."
+            };
+
+            return $"{result}\n\nЦена перехода: -1 еда, +1 день.";
+        }
+
+        private string NodeName(NodeType type)
+        {
+            return type switch
+            {
+                NodeType.Combat => "Бой",
+                NodeType.City => "Город",
+                NodeType.Boss => "Босс",
+                NodeType.Event => "Событие",
+                _ => "Маршрут"
+            };
         }
     }
 }
