@@ -60,11 +60,6 @@ namespace CaravanRoguelite.Generation
 
         private NodeType PickType(int depth, int lane, int lanes, int maxDepth)
         {
-            if (depth == 0)
-            {
-                return NodeType.Start;
-            }
-
             if (depth == maxDepth - 1)
             {
                 return lane == lanes / 2 ? NodeType.Boss : NodeType.Combat;
