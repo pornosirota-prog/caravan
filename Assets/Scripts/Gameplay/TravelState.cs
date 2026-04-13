@@ -28,8 +28,16 @@ namespace CaravanRoguelite.Gameplay
 
         private HashSet<int> GetAvailable()
         {
-            var current = _context.Graph.Get(_context.CurrentNodeId);
-            return new HashSet<int>(current.Links);
+            var available = new HashSet<int>();
+            foreach (var node in _context.Graph.Nodes)
+            {
+                if (node.Id != _context.CurrentNodeId)
+                {
+                    available.Add(node.Id);
+                }
+            }
+
+            return available;
         }
 
         private void OnNodeClicked(int id)
@@ -37,7 +45,7 @@ namespace CaravanRoguelite.Gameplay
             var available = GetAvailable();
             if (!available.Contains(id))
             {
-                _context.Hud.Log("Этот узел пока недоступен. Выберите узел со стрелкой ▲.");
+                _context.Hud.Log("Этот узел недоступен.");
                 _context.Sounds.PlayWarn();
                 return;
             }

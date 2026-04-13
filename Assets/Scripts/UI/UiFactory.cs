@@ -22,6 +22,7 @@ namespace CaravanRoguelite.UI
             text.color = VisualTheme.TextPrimary;
             text.fontSize = size;
             text.alignment = anchor;
+            text.raycastTarget = false;
             return text;
         }
 

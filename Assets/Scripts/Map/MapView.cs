@@ -126,59 +126,36 @@ namespace CaravanRoguelite.Map
 
         private Button CreateNode(MapNode node)
         {
-            var button = UiFactory.MakeButton(_root, "");
-            var rect = button.GetComponent<RectTransform>();
-            rect.sizeDelta = Vector2.one * (42f * _uiScale);
+            var buttonGo = new GameObject($"Node{node.Id}", typeof(RectTransform), typeof(Image), typeof(Button));
+            buttonGo.transform.SetParent(_root, false);
+            var button = buttonGo.GetComponent<Button>();
+            var rect = buttonGo.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(118f, 50f) * _uiScale;
             rect.anchoredPosition = GetNodePosition(node.Id);
 
-            var buttonImage = button.GetComponent<Image>();
-            buttonImage.sprite = ProceduralSpriteFactory.CreateCircle(new Color(0.08f, 0.11f, 0.15f, 0.96f), 64);
-            buttonImage.type = Image.Type.Simple;
+            var buttonImage = buttonGo.GetComponent<Image>();
+            buttonImage.sprite = ProceduralSpriteFactory.CreateRoundedRect(
+                new Color(0.09f, 0.14f, 0.2f, 0.97f),
+                VisualTheme.ByNodeType(node.Type),
+                96,
+                14,
+                5);
+            buttonImage.type = Image.Type.Sliced;
 
-            var glow = new GameObject("NodeGlow", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            glow.SetParent(button.transform, false);
-            glow.anchorMin = new Vector2(-0.4f, -0.4f);
-            glow.anchorMax = new Vector2(1.4f, 1.4f);
-            glow.offsetMin = Vector2.zero;
-            glow.offsetMax = Vector2.zero;
-            var glowImage = glow.GetComponent<Image>();
-            glowImage.raycastTarget = false;
-            glowImage.sprite = ProceduralSpriteFactory.CreateSoftCircle(VisualTheme.ByNodeType(node.Type), 128, 2f);
-            glowImage.color = new Color(1f, 1f, 1f, node.Id == _currentNodeId ? 0.52f : 0.18f);
-            glow.SetAsFirstSibling();
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 1f, 1f, 1f);
+            colors.pressedColor = new Color(0.88f, 0.94f, 1f, 1f);
+            colors.disabledColor = new Color(0.56f, 0.6f, 0.66f, 0.74f);
+            colors.fadeDuration = 0.12f;
+            button.colors = colors;
 
-            var icon = new GameObject("Silhouette", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            icon.SetParent(button.transform, false);
-            icon.anchorMin = new Vector2(0.12f, 0.12f);
-            icon.anchorMax = new Vector2(0.88f, 0.88f);
-            icon.offsetMin = Vector2.zero;
-            icon.offsetMax = Vector2.zero;
-            var iconImage = icon.GetComponent<Image>();
-            iconImage.raycastTarget = false;
-            iconImage.sprite = SpriteByType(node.Type);
-            iconImage.color = VisualTheme.ByNodeType(node.Type);
-
-            var typeLabel = UiFactory.MakeText(button.transform, LabelByType(node.Type), Mathf.RoundToInt(10f * _uiScale), TextAnchor.MiddleCenter);
-            typeLabel.rectTransform.anchorMin = new Vector2(-0.7f, -0.62f);
-            typeLabel.rectTransform.anchorMax = new Vector2(1.7f, -0.1f);
+            var typeLabel = UiFactory.MakeText(button.transform, LabelByType(node.Type), Mathf.RoundToInt(13f * _uiScale), TextAnchor.MiddleCenter);
+            typeLabel.rectTransform.anchorMin = new Vector2(0.06f, 0.14f);
+            typeLabel.rectTransform.anchorMax = new Vector2(0.94f, 0.86f);
             typeLabel.rectTransform.offsetMin = Vector2.zero;
             typeLabel.rectTransform.offsetMax = Vector2.zero;
-            typeLabel.color = new Color(0.88f, 0.94f, 1f, 0.95f);
-
-            var moveArrow = new GameObject("MoveArrow", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            moveArrow.SetParent(button.transform, false);
-            moveArrow.sizeDelta = Vector2.one * (18f * _uiScale);
-            moveArrow.anchoredPosition = new Vector2(0f, 41f * _uiScale);
-            var arrowImage = moveArrow.GetComponent<Image>();
-            arrowImage.raycastTarget = false;
-            arrowImage.sprite = ProceduralSpriteFactory.CreatePolygon(3, new Color(0.93f, 0.99f, 1f, 0.98f), 48, 90f);
-
-            var moveText = UiFactory.MakeText(moveArrow, "ЖМИ", Mathf.RoundToInt(8f * _uiScale), TextAnchor.LowerCenter);
-            moveText.rectTransform.anchorMin = new Vector2(-1.2f, -1.2f);
-            moveText.rectTransform.anchorMax = new Vector2(2.2f, -0.2f);
-            moveText.rectTransform.offsetMin = Vector2.zero;
-            moveText.rectTransform.offsetMax = Vector2.zero;
-            moveText.color = new Color(0.95f, 0.98f, 1f, 0.98f);
+            typeLabel.color = new Color(0.9f, 0.95f, 1f, 1f);
 
             if (node.Id == _currentNodeId)
             {
@@ -191,8 +168,6 @@ namespace CaravanRoguelite.Map
             }
 
             _nodeVisuals[node.Id] = rect;
-            _nodeGlows[node.Id] = glowImage;
-            _moveArrows[node.Id] = moveArrow;
 
             return button;
         }
@@ -211,7 +186,7 @@ namespace CaravanRoguelite.Map
             bg.type = Image.Type.Sliced;
             bg.raycastTarget = false;
 
-            var text = UiFactory.MakeText(panel, "1) Кликни по узлу со стрелкой ▲\n2) Посмотри прогноз и подтверди переход\n3) Серые узлы пока недоступны", Mathf.RoundToInt(13f * _uiScale), TextAnchor.UpperLeft);
+            var text = UiFactory.MakeText(panel, "1) Кликни по любому узлу\n2) Посмотри прогноз и подтверди переход\n3) Каждый переход: -1 еда, +1 день", Mathf.RoundToInt(13f * _uiScale), TextAnchor.UpperLeft);
             text.rectTransform.anchorMin = new Vector2(0.03f, 0.08f);
             text.rectTransform.anchorMax = new Vector2(0.97f, 0.94f);
             text.color = new Color(0.92f, 0.96f, 1f, 1f);
