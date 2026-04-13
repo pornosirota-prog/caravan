@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +7,8 @@ namespace CaravanRoguelite.UI
     public static class UiFactory
     {
         private static Font _font;
+
+        public static Action ButtonClicked;
 
         public static Font Font => _font ??= Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -38,6 +41,7 @@ namespace CaravanRoguelite.UI
             colors.disabledColor = new Color(0.5f, 0.56f, 0.64f, 0.7f);
             colors.fadeDuration = 0.15f;
             button.colors = colors;
+            button.onClick.AddListener(() => ButtonClicked?.Invoke());
 
             var glowGo = new GameObject("Glow", typeof(RectTransform), typeof(Image));
             glowGo.transform.SetParent(buttonGo.transform, false);

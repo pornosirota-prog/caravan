@@ -24,8 +24,8 @@ namespace CaravanRoguelite.Map
         {
             _root = new GameObject("MapPanel", typeof(RectTransform)).GetComponent<RectTransform>();
             _root.SetParent(parent, false);
-            _root.anchorMin = new Vector2(0.04f, 0.18f);
-            _root.anchorMax = new Vector2(0.96f, 0.9f);
+            _root.anchorMin = new Vector2(0.28f, 0.18f);
+            _root.anchorMax = new Vector2(0.98f, 0.9f);
             _root.offsetMin = Vector2.zero;
             _root.offsetMax = Vector2.zero;
         }
@@ -345,16 +345,21 @@ namespace CaravanRoguelite.Map
             _uiScale = Mathf.Clamp(Mathf.Min(width / 1280f, height / 720f), 0.82f, 1.2f);
             float spanX = Mathf.Max(0.01f, maxX - minX);
             float spanY = Mathf.Max(0.01f, maxY - minY);
-            float usableWidth = width * 0.72f;
-            float usableHeight = height * 0.54f;
+            float usableWidth = width * 0.84f;
+            float usableHeight = height * 0.7f;
             float scale = Mathf.Min(usableWidth / spanX, usableHeight / spanY);
             Vector2 center = new Vector2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
-            Vector2 mapOffset = new Vector2(width * 0.2f, -height * 0.05f);
+            Vector2 mapOffset = new Vector2(0f, -height * 0.03f);
 
             foreach (var node in graph.Nodes)
             {
                 Vector2 centered = (node.Position - center) * scale;
-                _nodePositions[node.Id] = centered + mapOffset;
+                var candidate = centered + mapOffset;
+                float marginX = 56f * _uiScale;
+                float marginY = 54f * _uiScale;
+                candidate.x = Mathf.Clamp(candidate.x, -width * 0.5f + marginX, width * 0.5f - marginX);
+                candidate.y = Mathf.Clamp(candidate.y, -height * 0.5f + marginY, height * 0.5f - marginY);
+                _nodePositions[node.Id] = candidate;
             }
         }
 

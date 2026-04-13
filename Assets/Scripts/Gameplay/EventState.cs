@@ -28,6 +28,14 @@ namespace CaravanRoguelite.Gameplay
                 _context.Stats.Health = Mathf.Clamp(_context.Stats.Health + choice.Health, 0, _context.Stats.MaxHealth);
                 _context.Stats.Attack += choice.Attack;
                 _context.Hud.Log(choice.Result);
+                if (choice.Health < 0 || choice.Morale < 0)
+                {
+                    _context.Sounds.PlayWarn();
+                }
+                else
+                {
+                    _context.Sounds.PlayOk();
+                }
                 _context.Hud.Refresh(_context.Stats, _context.Day);
 
                 if (_context.Stats.IsDefeated)

@@ -16,8 +16,8 @@ namespace CaravanRoguelite.UI
         {
             _root = new GameObject("ChoicePanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             _root.SetParent(parent, false);
-            _root.anchorMin = new Vector2(0.19f, 0.18f);
-            _root.anchorMax = new Vector2(0.81f, 0.82f);
+            _root.anchorMin = new Vector2(0.32f, 0.2f);
+            _root.anchorMax = new Vector2(0.94f, 0.86f);
             _root.offsetMin = Vector2.zero;
             _root.offsetMax = Vector2.zero;
 

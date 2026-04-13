@@ -39,26 +39,31 @@ namespace CaravanRoguelite.Gameplay
                 _context.Stats.Gold -= 5;
                 _context.Stats.Food += 4;
                 _context.Hud.Log("Запасы пополнены.");
+                _context.Sounds.PlayOk();
             }
             else if (idx == 1 && _context.Stats.Gold >= 8)
             {
                 _context.Stats.Gold -= 8;
                 _context.Stats.Health = Mathf.Clamp(_context.Stats.Health + 6, 0, _context.Stats.MaxHealth);
                 _context.Hud.Log("Лекарь укрепил караван.");
+                _context.Sounds.PlayOk();
             }
             else if (idx == 2 && _context.Stats.Gold >= 12)
             {
                 _context.Stats.Gold -= 12;
                 _context.Stats.Attack += 1;
                 _context.Hud.Log("Оружие улучшено.");
+                _context.Sounds.PlayOk();
             }
             else if (idx == 3)
             {
                 _context.Hud.Log("Караван покидает город.");
+                _context.Sounds.PlayClick();
             }
             else
             {
                 _context.Hud.Log("Недостаточно золота.");
+                _context.Sounds.PlayWarn();
                 _context.Hud.Refresh(_context.Stats, _context.Day);
                 Enter();
                 return;

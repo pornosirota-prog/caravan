@@ -19,6 +19,10 @@ namespace CaravanRoguelite.Gameplay
             BuildBackdrop(canvas.transform);
 
             _context = new GameContext();
+            _context.Sounds = new GameObject("UiSoundPlayer").AddComponent<UiSoundPlayer>();
+            _context.Sounds.transform.SetParent(canvas.transform, false);
+            UiFactory.ButtonClicked = () => _context.Sounds.PlayClick();
+
             _context.Hud = new GameHud(canvas.transform);
             _context.MapView = new MapView(canvas.transform);
             _context.Panel = new ChoicePanel(canvas.transform);

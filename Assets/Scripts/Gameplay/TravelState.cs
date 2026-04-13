@@ -38,6 +38,7 @@ namespace CaravanRoguelite.Gameplay
             if (!available.Contains(id))
             {
                 _context.Hud.Log("Этот узел пока недоступен. Выберите узел со стрелкой ▲.");
+                _context.Sounds.PlayWarn();
                 return;
             }
 
@@ -51,11 +52,13 @@ namespace CaravanRoguelite.Gameplay
                     _context.Panel.Hide();
                     if (choice == 0)
                     {
+                        _context.Sounds.PlayOk();
                         ConfirmTravel(id);
                     }
                     else
                     {
                         _context.Hud.Log("Переход отменён. Выберите другой маршрут.");
+                        _context.Sounds.PlayWarn();
                     }
                 });
         }
