@@ -77,6 +77,7 @@ namespace CaravanRoguelite.Gameplay
             var image = bg.GetComponent<Image>();
             image.sprite = ProceduralSpriteFactory.CreateProceduralBackdrop(VisualTheme.BackgroundTop, VisualTheme.BackgroundBottom, VisualTheme.Accent, 768, 512, Random.Range(0, 99999));
             image.type = Image.Type.Simple;
+            image.raycastTarget = false;
 
             var haze = new GameObject("BackdropHaze", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             haze.SetParent(bg, false);
