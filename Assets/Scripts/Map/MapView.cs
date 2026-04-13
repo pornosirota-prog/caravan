@@ -13,6 +13,7 @@ namespace CaravanRoguelite.Map
         private readonly Dictionary<int, Button> _buttons = new();
         private readonly Dictionary<int, RectTransform> _nodeVisuals = new();
         private readonly Dictionary<int, Image> _nodeGlows = new();
+        private readonly Dictionary<int, RectTransform> _moveArrows = new();
         private readonly List<RectTransform> _particles = new();
         private int _currentNodeId;
 
@@ -37,9 +38,11 @@ namespace CaravanRoguelite.Map
             _buttons.Clear();
             _nodeVisuals.Clear();
             _nodeGlows.Clear();
+            _moveArrows.Clear();
             _particles.Clear();
 
             DrawBiomeBands(graph);
+            CreateGuideOverlay();
 
             foreach (var node in graph.Nodes)
             {
@@ -75,6 +78,12 @@ namespace CaravanRoguelite.Map
                     float alpha = pair.Key == _currentNodeId ? 0.5f : 0.18f;
                     glow.color = new Color(glow.color.r, glow.color.g, glow.color.b, alpha + Mathf.Sin(phase) * 0.08f);
                 }
+
+                if (_moveArrows.TryGetValue(pair.Key, out var arrow))
+                {
+                    float bounce = Mathf.Sin((time * 6f) + pair.Key * 0.9f) * 4f;
+                    arrow.anchoredPosition = new Vector2(0f, 41f + bounce);
+                }
             }
 
             for (int i = 0; i < _particles.Count; i++)
@@ -95,6 +104,11 @@ namespace CaravanRoguelite.Map
                 pair.Value.interactable = enabled;
                 var image = pair.Value.GetComponent<Image>();
                 image.color = enabled || pair.Key == _currentNodeId ? Color.white : new Color(0.62f, 0.65f, 0.7f, 0.72f);
+
+                if (_moveArrows.TryGetValue(pair.Key, out var arrow))
+                {
+                    arrow.gameObject.SetActive(enabled);
+                }
             }
         }
 
@@ -132,10 +146,62 @@ namespace CaravanRoguelite.Map
             iconImage.sprite = SpriteByType(node.Type);
             iconImage.color = VisualTheme.ByNodeType(node.Type);
 
+            var typeLabel = UiFactory.MakeText(button.transform, LabelByType(node.Type), 10, TextAnchor.MiddleCenter);
+            typeLabel.rectTransform.anchorMin = new Vector2(-0.7f, -0.62f);
+            typeLabel.rectTransform.anchorMax = new Vector2(1.7f, -0.1f);
+            typeLabel.rectTransform.offsetMin = Vector2.zero;
+            typeLabel.rectTransform.offsetMax = Vector2.zero;
+            typeLabel.color = new Color(0.88f, 0.94f, 1f, 0.95f);
+
+            var moveArrow = new GameObject("MoveArrow", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            moveArrow.SetParent(button.transform, false);
+            moveArrow.sizeDelta = new Vector2(18, 18);
+            moveArrow.anchoredPosition = new Vector2(0f, 41f);
+            var arrowImage = moveArrow.GetComponent<Image>();
+            arrowImage.raycastTarget = false;
+            arrowImage.sprite = ProceduralSpriteFactory.CreatePolygon(3, new Color(0.93f, 0.99f, 1f, 0.98f), 48, 90f);
+
+            var moveText = UiFactory.MakeText(moveArrow, "ЖМИ", 8, TextAnchor.LowerCenter);
+            moveText.rectTransform.anchorMin = new Vector2(-1.2f, -1.2f);
+            moveText.rectTransform.anchorMax = new Vector2(2.2f, -0.2f);
+            moveText.rectTransform.offsetMin = Vector2.zero;
+            moveText.rectTransform.offsetMax = Vector2.zero;
+            moveText.color = new Color(0.95f, 0.98f, 1f, 0.98f);
+
+            if (node.Id == _currentNodeId)
+            {
+                var marker = UiFactory.MakeText(button.transform, "ВЫ ЗДЕСЬ", 10, TextAnchor.UpperCenter);
+                marker.rectTransform.anchorMin = new Vector2(-0.8f, 1.02f);
+                marker.rectTransform.anchorMax = new Vector2(1.8f, 1.62f);
+                marker.rectTransform.offsetMin = Vector2.zero;
+                marker.rectTransform.offsetMax = Vector2.zero;
+                marker.color = new Color(1f, 0.97f, 0.77f, 1f);
+            }
+
             _nodeVisuals[node.Id] = rect;
             _nodeGlows[node.Id] = glowImage;
+            _moveArrows[node.Id] = moveArrow;
 
             return button;
+        }
+
+        private void CreateGuideOverlay()
+        {
+            var panel = new GameObject("GuidePanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            panel.SetParent(_root, false);
+            panel.anchorMin = new Vector2(0.02f, 0.84f);
+            panel.anchorMax = new Vector2(0.5f, 0.99f);
+            panel.offsetMin = Vector2.zero;
+            panel.offsetMax = Vector2.zero;
+
+            var bg = panel.GetComponent<Image>();
+            bg.sprite = ProceduralSpriteFactory.CreateRoundedRect(new Color(0.04f, 0.07f, 0.1f, 0.86f), new Color(0.3f, 0.48f, 0.7f, 0.9f), 96, 14, 4);
+            bg.type = Image.Type.Sliced;
+
+            var text = UiFactory.MakeText(panel, "1) Найди метку ВЫ ЗДЕСЬ\n2) Жми на узел со стрелкой ▲ ЖМИ\n3) Серые узлы пока недоступны", 13, TextAnchor.UpperLeft);
+            text.rectTransform.anchorMin = new Vector2(0.03f, 0.08f);
+            text.rectTransform.anchorMax = new Vector2(0.97f, 0.94f);
+            text.color = new Color(0.92f, 0.96f, 1f, 1f);
         }
 
         private void DrawBiomeBands(MapGraph graph)
@@ -206,6 +272,19 @@ namespace CaravanRoguelite.Map
                 NodeType.City => ProceduralSpriteFactory.CreateRoundedRect(Color.white, Color.white, 72, 12, 0),
                 NodeType.Boss => ProceduralSpriteFactory.CreatePolygon(3, Color.white, 72, 90f),
                 _ => ProceduralSpriteFactory.CreatePolygon(5, Color.white, 72, 18f)
+            };
+        }
+
+        private string LabelByType(NodeType type)
+        {
+            return type switch
+            {
+                NodeType.Start => "СТАРТ",
+                NodeType.Event => "СОБЫТИЕ",
+                NodeType.Combat => "БОЙ",
+                NodeType.City => "ГОРОД",
+                NodeType.Boss => "БОСС",
+                _ => "УЗЕЛ"
             };
         }
     }
