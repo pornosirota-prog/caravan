@@ -12,6 +12,10 @@ namespace CaravanRoguelite.UI
         private AudioClip _hit;
         private AudioClip _win;
         private AudioClip _lose;
+        private AudioClip _travel;
+        private AudioClip _event;
+        private AudioClip _city;
+        private AudioClip _combat;
 
         private void Awake()
         {
@@ -26,6 +30,10 @@ namespace CaravanRoguelite.UI
             _hit = BuildTone(320f, 0.08f, Wave.Square, 0.9f);
             _win = BuildSweep(420f, 920f, 0.22f, 0.95f);
             _lose = BuildSweep(380f, 150f, 0.24f, 0.95f);
+            _travel = BuildSweep(520f, 620f, 0.11f, 0.7f);
+            _event = BuildSweep(560f, 340f, 0.14f, 0.75f);
+            _city = BuildTone(510f, 0.1f, Wave.Sine, 0.45f);
+            _combat = BuildTone(180f, 0.13f, Wave.Saw, 0.92f);
         }
 
         public void PlayClick() => Play(_click, 0.55f);
@@ -34,6 +42,10 @@ namespace CaravanRoguelite.UI
         public void PlayHit() => Play(_hit, 0.8f);
         public void PlayWin() => Play(_win, 0.95f);
         public void PlayLose() => Play(_lose, 0.95f);
+        public void PlayTravel() => Play(_travel, 0.8f);
+        public void PlayEvent() => Play(_event, 0.7f);
+        public void PlayCity() => Play(_city, 0.85f);
+        public void PlayCombat() => Play(_combat, 0.8f);
 
         private void Play(AudioClip clip, float volume)
         {

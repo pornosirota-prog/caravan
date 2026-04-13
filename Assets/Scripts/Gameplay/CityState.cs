@@ -15,6 +15,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Sounds.PlayCity();
             _context.Panel.Show(
                 "Город",
                 "Торговая застава предлагает несколько сделок.",

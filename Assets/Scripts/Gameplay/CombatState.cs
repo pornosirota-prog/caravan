@@ -21,6 +21,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Sounds.PlayCombat();
             _enemy = _isBoss ? _context.Enemies[^1] : _context.Enemies[Random.Range(0, _context.Enemies.Count - 1)];
             _enemyHealth = _enemy.MaxHealth;
             ShowChoices($"Бой: {_enemy.Name} (HP {_enemyHealth})");

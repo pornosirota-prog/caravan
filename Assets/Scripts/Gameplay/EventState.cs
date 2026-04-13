@@ -15,6 +15,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Sounds.PlayEvent();
             var ev = _context.Events[Random.Range(0, _context.Events.Count)];
             var labels = new List<string>();
             foreach (var choice in ev.Choices) labels.Add(choice.Text);
