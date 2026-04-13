@@ -2,6 +2,7 @@ using CaravanRoguelite.Generation;
 using CaravanRoguelite.Map;
 using CaravanRoguelite.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CaravanRoguelite.Gameplay
@@ -13,6 +14,7 @@ namespace CaravanRoguelite.Gameplay
         private void Start()
         {
             EnsureCamera();
+            EnsureEventSystem();
             var canvas = BuildCanvas();
             BuildBackdrop(canvas.transform);
 
@@ -62,6 +64,16 @@ namespace CaravanRoguelite.Gameplay
             scaler.referenceResolution = new Vector2(1280, 720);
 
             return canvas;
+        }
+
+        private void EnsureEventSystem()
+        {
+            if (Object.FindFirstObjectByType<EventSystem>() != null)
+            {
+                return;
+            }
+
+            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         }
 
         private void BuildBackdrop(Transform parent)
