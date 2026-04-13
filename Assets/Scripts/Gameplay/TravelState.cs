@@ -60,7 +60,6 @@ namespace CaravanRoguelite.Gameplay
                     _context.Panel.Hide();
                     if (choice == 0)
                     {
-                        _context.Sounds.PlayOk();
                         ConfirmTravel(id);
                     }
                     else
@@ -74,6 +73,7 @@ namespace CaravanRoguelite.Gameplay
         private void ConfirmTravel(int id)
         {
             _context.CurrentNodeId = id;
+            _context.Sounds.PlayTravel();
             _context.Day++;
             _context.Stats.Food--;
             var node = _context.Graph.Get(id);
