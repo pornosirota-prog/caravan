@@ -14,7 +14,9 @@ namespace CaravanRoguelite.Map
         private readonly Dictionary<int, RectTransform> _nodeVisuals = new();
         private readonly Dictionary<int, Image> _nodeGlows = new();
         private readonly Dictionary<int, RectTransform> _moveArrows = new();
+        private readonly Dictionary<int, Vector2> _nodePositions = new();
         private readonly List<RectTransform> _particles = new();
+        private RectTransform _caravan;
         private int _currentNodeId;
 
         public MapView(Transform parent)
@@ -39,17 +41,19 @@ namespace CaravanRoguelite.Map
             _nodeVisuals.Clear();
             _nodeGlows.Clear();
             _moveArrows.Clear();
+            _nodePositions.Clear();
             _particles.Clear();
+            _caravan = null;
 
             DrawBiomeBands(graph);
             CreateGuideOverlay();
+            BuildNodeLayout(graph);
 
             foreach (var node in graph.Nodes)
             {
                 foreach (int target in node.Links)
                 {
-                    var to = graph.Get(target);
-                    DrawLink(node.Position, to.Position);
+                    DrawLink(node.Id, target, graph);
                 }
             }
 
@@ -62,6 +66,7 @@ namespace CaravanRoguelite.Map
             }
 
             CreateAmbientParticles(28);
+            CreateCaravanMarker();
         }
 
         public void Tick(float time)
@@ -84,6 +89,12 @@ namespace CaravanRoguelite.Map
                     float bounce = Mathf.Sin((time * 6f) + pair.Key * 0.9f) * 4f;
                     arrow.anchoredPosition = new Vector2(0f, 41f + bounce);
                 }
+            }
+
+            if (_caravan != null && _nodePositions.TryGetValue(_currentNodeId, out var markerTarget))
+            {
+                float wagonBounce = Mathf.Sin(time * 3.2f) * 3.2f;
+                _caravan.anchoredPosition = Vector2.Lerp(_caravan.anchoredPosition, markerTarget + new Vector2(0f, 54f + wagonBounce), 0.14f);
             }
 
             for (int i = 0; i < _particles.Count; i++)
@@ -117,7 +128,7 @@ namespace CaravanRoguelite.Map
             var button = UiFactory.MakeButton(_root, "");
             var rect = button.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(42, 42);
-            rect.anchoredPosition = node.Position * 56f;
+            rect.anchoredPosition = GetNodePosition(node.Id);
 
             var buttonImage = button.GetComponent<Image>();
             buttonImage.sprite = ProceduralSpriteFactory.CreateCircle(new Color(0.08f, 0.11f, 0.15f, 0.96f), 64);
@@ -189,8 +200,8 @@ namespace CaravanRoguelite.Map
         {
             var panel = new GameObject("GuidePanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             panel.SetParent(_root, false);
-            panel.anchorMin = new Vector2(0.02f, 0.84f);
-            panel.anchorMax = new Vector2(0.5f, 0.99f);
+            panel.anchorMin = new Vector2(0.02f, 0.82f);
+            panel.anchorMax = new Vector2(0.52f, 0.99f);
             panel.offsetMin = Vector2.zero;
             panel.offsetMax = Vector2.zero;
 
@@ -198,7 +209,7 @@ namespace CaravanRoguelite.Map
             bg.sprite = ProceduralSpriteFactory.CreateRoundedRect(new Color(0.04f, 0.07f, 0.1f, 0.86f), new Color(0.3f, 0.48f, 0.7f, 0.9f), 96, 14, 4);
             bg.type = Image.Type.Sliced;
 
-            var text = UiFactory.MakeText(panel, "1) Найди метку ВЫ ЗДЕСЬ\n2) Жми на узел со стрелкой ▲ ЖМИ\n3) Серые узлы пока недоступны", 13, TextAnchor.UpperLeft);
+            var text = UiFactory.MakeText(panel, "1) Кликни по узлу со стрелкой ▲\n2) Посмотри прогноз и подтверди переход\n3) Серые узлы пока недоступны", 13, TextAnchor.UpperLeft);
             text.rectTransform.anchorMin = new Vector2(0.03f, 0.08f);
             text.rectTransform.anchorMax = new Vector2(0.97f, 0.94f);
             text.color = new Color(0.92f, 0.96f, 1f, 1f);
@@ -223,10 +234,12 @@ namespace CaravanRoguelite.Map
             }
         }
 
-        private void DrawLink(Vector2 from, Vector2 to)
+        private void DrawLink(int fromNodeId, int toNodeId, MapGraph graph)
         {
-            var delta = (to - from) * 56f;
-            var position = from * 56f + delta / 2f;
+            var from = GetNodePosition(fromNodeId);
+            var to = GetNodePosition(toNodeId);
+            var delta = to - from;
+            var position = from + delta / 2f;
             float angle = Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg;
 
             var glow = new GameObject("LinkGlow", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
@@ -260,6 +273,80 @@ namespace CaravanRoguelite.Map
                 image.raycastTarget = false;
                 image.sprite = ProceduralSpriteFactory.CreateSoftCircle(new Color(0.72f, 0.85f, 1f, UnityEngine.Random.Range(0.08f, 0.2f)), 64, 2.6f);
                 _particles.Add(particle);
+            }
+        }
+
+        private void CreateCaravanMarker()
+        {
+            _caravan = new GameObject("CaravanMarker", typeof(RectTransform)).GetComponent<RectTransform>();
+            _caravan.SetParent(_root, false);
+            _caravan.sizeDelta = new Vector2(56f, 36f);
+            if (_nodePositions.TryGetValue(_currentNodeId, out var currentPos))
+            {
+                _caravan.anchoredPosition = currentPos + new Vector2(0f, 54f);
+            }
+
+            var body = new GameObject("CaravanBody", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            body.SetParent(_caravan, false);
+            body.anchorMin = new Vector2(0.12f, 0.32f);
+            body.anchorMax = new Vector2(0.88f, 0.78f);
+            body.offsetMin = Vector2.zero;
+            body.offsetMax = Vector2.zero;
+            var bodyImage = body.GetComponent<Image>();
+            bodyImage.raycastTarget = false;
+            bodyImage.sprite = ProceduralSpriteFactory.CreateRoundedRect(new Color(0.66f, 0.5f, 0.34f, 1f), new Color(0.88f, 0.74f, 0.52f, 1f), 80, 14, 4);
+            bodyImage.type = Image.Type.Sliced;
+
+            CreateWheel(new Vector2(0.28f, 0.18f));
+            CreateWheel(new Vector2(0.72f, 0.18f));
+        }
+
+        private void CreateWheel(Vector2 anchor)
+        {
+            var wheel = new GameObject("Wheel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            wheel.SetParent(_caravan, false);
+            wheel.anchorMin = anchor;
+            wheel.anchorMax = anchor;
+            wheel.sizeDelta = new Vector2(11f, 11f);
+            wheel.anchoredPosition = Vector2.zero;
+            var image = wheel.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.sprite = ProceduralSpriteFactory.CreateCircle(new Color(0.14f, 0.17f, 0.22f, 1f), 64);
+        }
+
+        private Vector2 GetNodePosition(int nodeId)
+        {
+            return _nodePositions.TryGetValue(nodeId, out var value) ? value : Vector2.zero;
+        }
+
+        private void BuildNodeLayout(MapGraph graph)
+        {
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+
+            foreach (var node in graph.Nodes)
+            {
+                minX = Mathf.Min(minX, node.Position.x);
+                maxX = Mathf.Max(maxX, node.Position.x);
+                minY = Mathf.Min(minY, node.Position.y);
+                maxY = Mathf.Max(maxY, node.Position.y);
+            }
+
+            var size = _root.rect.size;
+            float width = Mathf.Max(size.x, 900f);
+            float height = Mathf.Max(size.y, 460f);
+            float spanX = Mathf.Max(0.01f, maxX - minX);
+            float spanY = Mathf.Max(0.01f, maxY - minY);
+            float scale = Mathf.Min((width * 0.66f) / spanX, (height * 0.52f) / spanY);
+            Vector2 center = new Vector2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
+            Vector2 mapOffset = new Vector2(width * 0.17f, -height * 0.02f);
+
+            foreach (var node in graph.Nodes)
+            {
+                Vector2 centered = (node.Position - center) * scale;
+                _nodePositions[node.Id] = centered + mapOffset;
             }
         }
 
