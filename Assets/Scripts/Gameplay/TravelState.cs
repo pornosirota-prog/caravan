@@ -15,7 +15,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
-            _context.Hud.Log("Выберите соседний узел для перехода.");
+            _context.Hud.Log("Ваш узел помечен \"ВЫ ЗДЕСЬ\". Нажимайте только на узлы со стрелкой ▲ ЖМИ.");
             _context.MapView.Render(_context.Graph, _context.CurrentNodeId, OnNodeClicked);
             _context.MapView.SetInteractable(GetAvailable());
             _context.Hud.Refresh(_context.Stats, _context.Day);
