@@ -15,6 +15,9 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Hud.SetVisible(true);
+            _context.Hud.SetStrategyNavigationEnabled(true);
+            _context.StrategyScreen.SetVisible(false);
             _context.Hud.Log("Ваш караван отмечен над текущим узлом. Кликните доступный узел, чтобы увидеть прогноз перед переходом.");
             _context.MapView.Render(_context.Graph, _context.CurrentNodeId, OnNodeClicked);
             _context.MapView.SetInteractable(GetAvailable());

@@ -15,6 +15,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Hud.SetStrategyNavigationEnabled(false);
             _context.Sounds.PlayCity();
             _context.Panel.Show(
                 "Город",
