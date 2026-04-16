@@ -108,6 +108,11 @@ namespace CaravanRoguelite.Map
             }
         }
 
+
+        public void SetVisible(bool visible)
+        {
+            _root.gameObject.SetActive(visible);
+        }
         public void SetInteractable(HashSet<int> allowed)
         {
             foreach (var pair in _buttons)

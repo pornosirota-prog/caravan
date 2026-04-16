@@ -7,14 +7,23 @@ namespace CaravanRoguelite.UI
 {
     public class GameHud
     {
+        private readonly RectTransform _root;
         private readonly Text _top;
         private readonly Text _log;
         private readonly Dictionary<string, StatWidget> _widgets = new();
+        private readonly Button _strategyButton;
 
         public GameHud(Transform parent)
         {
+            _root = new GameObject("HudRoot", typeof(RectTransform)).GetComponent<RectTransform>();
+            _root.SetParent(parent, false);
+            _root.anchorMin = Vector2.zero;
+            _root.anchorMax = Vector2.one;
+            _root.offsetMin = Vector2.zero;
+            _root.offsetMax = Vector2.zero;
+
             var topPanel = new GameObject("TopPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            topPanel.SetParent(parent, false);
+            topPanel.SetParent(_root, false);
             topPanel.anchorMin = new Vector2(0f, 0.915f);
             topPanel.anchorMax = new Vector2(1f, 0.995f);
             topPanel.offsetMin = new Vector2(16, 0);
@@ -25,11 +34,18 @@ namespace CaravanRoguelite.UI
 
             _top = UiFactory.MakeText(topPanel, "", 22, TextAnchor.MiddleLeft);
             _top.rectTransform.anchorMin = new Vector2(0.02f, 0.08f);
-            _top.rectTransform.anchorMax = new Vector2(0.98f, 0.92f);
+            _top.rectTransform.anchorMax = new Vector2(0.78f, 0.92f);
             _top.color = VisualTheme.TextPrimary;
 
+            _strategyButton = UiFactory.MakeButton(topPanel, "Стратегия");
+            var strategyRect = _strategyButton.GetComponent<RectTransform>();
+            strategyRect.anchorMin = new Vector2(0.8f, 0.15f);
+            strategyRect.anchorMax = new Vector2(0.98f, 0.85f);
+            strategyRect.offsetMin = Vector2.zero;
+            strategyRect.offsetMax = Vector2.zero;
+
             var statsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            statsPanel.SetParent(parent, false);
+            statsPanel.SetParent(_root, false);
             statsPanel.anchorMin = new Vector2(0.02f, 0.18f);
             statsPanel.anchorMax = new Vector2(0.29f, 0.9f);
             statsPanel.offsetMin = Vector2.zero;
@@ -50,7 +66,7 @@ namespace CaravanRoguelite.UI
             CreateWidget(statsPanel, "attack", "Атака", 0.30f, new Color(0.6f, 0.82f, 1f, 1f));
 
             var logPanel = new GameObject("LogPanel", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            logPanel.SetParent(parent, false);
+            logPanel.SetParent(_root, false);
             logPanel.anchorMin = new Vector2(0f, 0f);
             logPanel.anchorMax = new Vector2(1f, 0.145f);
             logPanel.offsetMin = new Vector2(16, 10);
@@ -79,6 +95,22 @@ namespace CaravanRoguelite.UI
         public void Log(string message)
         {
             _log.text = message;
+        }
+
+        public void BindOpenStrategy(System.Action onOpenStrategy)
+        {
+            _strategyButton.onClick.RemoveAllListeners();
+            _strategyButton.onClick.AddListener(() => onOpenStrategy?.Invoke());
+        }
+
+        public void SetStrategyNavigationEnabled(bool enabled)
+        {
+            _strategyButton.interactable = enabled;
+        }
+
+        public void SetVisible(bool visible)
+        {
+            _root.gameObject.SetActive(visible);
         }
 
         private void CreateWidget(Transform parent, string id, string label, float yAnchor, Color color)

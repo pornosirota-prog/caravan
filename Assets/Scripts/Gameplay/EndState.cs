@@ -16,6 +16,7 @@ namespace CaravanRoguelite.Gameplay
 
         public void Enter()
         {
+            _context.Hud.SetStrategyNavigationEnabled(false);
             string title = _win ? "Победа" : "Поражение";
             string body = _win
                 ? "Вождь пустоши повержен. Караван нашёл безопасный путь."

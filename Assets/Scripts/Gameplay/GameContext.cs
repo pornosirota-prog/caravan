@@ -6,6 +6,7 @@ using CaravanRoguelite.Data;
 using CaravanRoguelite.Events;
 using CaravanRoguelite.Map;
 using CaravanRoguelite.UI;
+using CaravanRoguelite.Strategy.UI;
 
 namespace CaravanRoguelite.Gameplay
 {
@@ -21,6 +22,7 @@ namespace CaravanRoguelite.Gameplay
         public GameHud Hud;
         public ChoicePanel Panel;
         public UiSoundPlayer Sounds;
+        public StrategyScreen StrategyScreen;
 
         public int Day = 1;
         public int CurrentNodeId;

@@ -1,6 +1,8 @@
 using CaravanRoguelite.Generation;
 using CaravanRoguelite.Map;
 using CaravanRoguelite.UI;
+using CaravanRoguelite.Strategy.Services;
+using CaravanRoguelite.Strategy.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -26,6 +28,13 @@ namespace CaravanRoguelite.Gameplay
             _context.Hud = new GameHud(canvas.transform);
             _context.MapView = new MapView(canvas.transform);
             _context.Panel = new ChoicePanel(canvas.transform);
+            _context.StrategyScreen = new StrategyScreen(canvas.transform, new StrategyGameService(
+                new GridStrategyMapGenerator(),
+                new AdditionMathTaskGenerator(),
+                new ComboBattleProgressionService(),
+                new TerritoryRewardCalculator()));
+            _context.StrategyScreen.BackToCaravanRequested = () => _context.StateMachine.ChangeState(new TravelState(_context));
+            _context.Hud.BindOpenStrategy(() => _context.StateMachine.ChangeState(new StrategyState(_context)));
             _context.Graph = new MapGenerator().Create(Random.Range(0, 999999));
             _context.CurrentNodeId = 0;
 
@@ -39,6 +48,7 @@ namespace CaravanRoguelite.Gameplay
         {
             _context?.StateMachine.Tick();
             _context?.MapView.Tick(Time.time);
+            _context?.StrategyScreen?.Tick(Time.deltaTime);
         }
 
         private void EnsureCamera()
