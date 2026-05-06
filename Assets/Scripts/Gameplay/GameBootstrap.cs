@@ -1,4 +1,5 @@
 using CaravanRoguelite.Generation;
+using CaravanRoguelite.GridMap;
 using CaravanRoguelite.Map;
 using CaravanRoguelite.UI;
 using CaravanRoguelite.Strategy.Services;
@@ -19,6 +20,7 @@ namespace CaravanRoguelite.Gameplay
             EnsureEventSystem();
             var canvas = BuildCanvas();
             BuildBackdrop(canvas.transform);
+            BuildGridMap();
 
             _context = new GameContext();
             _context.Sounds = new GameObject("UiSoundPlayer").AddComponent<UiSoundPlayer>();
@@ -78,6 +80,13 @@ namespace CaravanRoguelite.Gameplay
             scaler.referenceResolution = new Vector2(1280, 720);
 
             return canvas;
+        }
+
+        private void BuildGridMap()
+        {
+            var gridMapObject = new GameObject("Grid Map", typeof(Grid), typeof(GridMapGenerator));
+            var generator = gridMapObject.GetComponent<GridMapGenerator>();
+            generator.GenerateMap();
         }
 
         private void EnsureEventSystem()
