@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using CaravanRoguelite.Cards;
+using CaravanRoguelite.Enemies;
+using CaravanRoguelite.Run;
 using CaravanRoguelite.Strategy.Domain;
 using CaravanRoguelite.Strategy.Services;
 using NUnit.Framework;
@@ -105,6 +109,53 @@ namespace CaravanRoguelite.Tests.EditMode
             Assert.NotNull(target);
             Assert.AreEqual(TerritoryOwner.Player, target.Owner);
             Assert.Greater(state.Gold, initialGold);
+        }
+
+
+        [Test]
+        public void ComboResolver_AttackFireCritCreatesSignatureCombo()
+        {
+            var cards = new List<CardDefinition>
+            {
+                new CardDefinition("strike", "Удар", "", 5, 1, new[] { CardTag.Attack }),
+                new CardDefinition("fire", "Огонь", "", 4, 1, new[] { CardTag.Fire }),
+                new CardDefinition("crit", "Крит", "", 4, 1, new[] { CardTag.Crit })
+            };
+
+            var result = new ComboResolver().Resolve(cards);
+
+            Assert.AreEqual("Критический огненный удар", result.Title);
+            Assert.AreEqual(39, result.Damage);
+            Assert.AreEqual(StatusEffect.Burning, result.StatusEffect);
+        }
+
+        [Test]
+        public void PlayerDeck_RemoveWeakestKeepsThinDeckFloor()
+        {
+            var deck = new PlayerDeck(CardLibrary.CreateWarriorStarter(), 42);
+
+            Assert.IsTrue(deck.RemoveWeakest());
+
+            for (int i = 0; i < 10; i++)
+            {
+                deck.RemoveWeakest();
+            }
+
+            Assert.AreEqual(5, deck.Count);
+        }
+
+        [Test]
+        public void InfiniteScaling_IncreasesHealthDamageAndArmorByFloorAndAct()
+        {
+            var baseStats = new EnemyStats { MaxHealth = 50, CurrentHealth = 50, Damage = 10, Armor = 1 };
+            var service = new InfiniteScalingService();
+
+            var early = service.Scale(baseStats, 1, 1);
+            var late = service.Scale(baseStats, 10, 3);
+
+            Assert.Greater(late.MaxHealth, early.MaxHealth);
+            Assert.Greater(late.Damage, early.Damage);
+            Assert.Greater(late.Armor, early.Armor);
         }
 
         private static StrategyGameService BuildGameService(IMathTaskGenerator generator = null)

@@ -1,3 +1,4 @@
+using CaravanRoguelite.Cards;
 using CaravanRoguelite.Generation;
 using CaravanRoguelite.GridMap;
 using CaravanRoguelite.Map;
@@ -23,6 +24,9 @@ namespace CaravanRoguelite.Gameplay
             BuildGridMap();
 
             _context = new GameContext();
+            _context.Deck = new PlayerDeck(CardLibrary.CreateWarriorStarter());
+            _context.Stats.MaxHealth = _context.Hero.MaxHealth;
+            _context.Stats.Health = _context.Hero.CurrentHealth;
             _context.Sounds = new GameObject("UiSoundPlayer").AddComponent<UiSoundPlayer>();
             _context.Sounds.transform.SetParent(canvas.transform, false);
             UiFactory.ButtonClicked = () => _context.Sounds.PlayClick();
